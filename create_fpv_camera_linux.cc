@@ -1,8 +1,6 @@
 #include "pifpv.h"
 #include "FpvCameraLinux.h"
 #include <glog/logging.h>
-#include <string.h>
-#include <errno.h>
 #include <fcntl.h>
 #include <linux/videodev2.h>
 #include <libv4l2.h>
@@ -34,27 +32,25 @@ namespace PiVehicle {
             return 1;
         }
         format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        res = v4l2_ioctl(fd, VIDIOC_G_FMT, &camera->format);
+        res = v4l2_ioctl(fd, VIDIOC_G_FMT, &format);
         if (res != 0) {
             LOG(ERROR) << "Couldn't get data format: " << strerror(errno) << ". Returned.";
             return 1;
         }
+        LOG(INFO) << "Support " << fmtdesc.index + 1 << " pixel format(s):";
         fmtdesc.index = 0;
         fmtdesc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        while (ioctl(fd, VIDIOC_ENUM_FMT, &fmtdesc) != -1)
+        FpvCameraLinux *_camera = new FpvCameraLinux();
+        _camera->setPath(path);
+        _camera->setFd(fd);
+        _camera->setV4l2Capability(capability);
+        _camera->setV4l2Format(format);
+        while (v4l2_ioctl(fd, VIDIOC_ENUM_FMT, &fmtdesc) != -1) {
             fmtdesc.index++;
-        LOG(INFO) << "Support " << fmtdesc.index + 1 << " pixel format(s):";
-        camera = new FpvCameraLinux();
-        camera->setPath(path);
-        camera->setFd(fd);
-        camera->setV4l2Capability(capability);
-        camera->setV4l2Format(format);
-        for (int i = 0; i < camera->_n_pixelformats; ++i) {
-            fmtdesc.index = i;
-            v4l2_ioctl(fd, VIDIOC_ENUM_FMT, &fmtdesc);
-            camera->addV4l2PixelFormat(fmtdesc.pixelformat);
+            _camera->addV4l2PixelFormat(fmtdesc.pixelformat);
             LOG(INFO) << "\t\t" << fmtdesc.description;
         }
+        camera = _camera;
         return 0;
     }
 
@@ -62,12 +58,12 @@ namespace PiVehicle {
         LOG(INFO) << "Driver:\t\t" << capability->driver;
         LOG(INFO) << "Card:\t\t" << capability->card;
         LOG(INFO) << "Bus:\t\t" << capability->bus_info;
-        LOG(INFO) << "Version:\t\t"
-                  << (int)(capability->version >> 16) & 0xFF << "."
-                  << (int)(capability->version >> 8) & 0xFF << "."
-                  << (int)capability->version & 0xFF;
+//        LOG(INFO) << "Version:\t\t"
+//                  << (int)(capability->version >> 16) & 0xFF << "."
+//                  << (int)(capability->version >> 8) & 0xFF << "."
+//                  << (int)capability->version & 0xFF;
         LOG(INFO) << "Capabilities:";
-        const int capabilities[] = {
+        const unsigned int capabilities[] = {
                         V4L2_CAP_VIDEO_CAPTURE,
                         V4L2_CAP_VIDEO_OUTPUT,
                         V4L2_CAP_VIDEO_OVERLAY,
