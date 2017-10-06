@@ -15,7 +15,7 @@ namespace PiVehicle {
             return 1;
         }
         for (int i = 0; i < handle->gl_pathc; ++i) {
-            list.push_back(static_cast<const char *>(handle->gl_pathv[i]));
+            list.emplace_back(static_cast<const char *>(handle->gl_pathv[i]));
             LOG(INFO) << "\t\t" << handle->gl_pathv[i];
         }
         globfree(handle);
