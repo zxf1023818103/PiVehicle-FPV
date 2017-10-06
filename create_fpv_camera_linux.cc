@@ -2,26 +2,23 @@
 #include "FpvCameraLinux.h"
 #include <glog/logging.h>
 #include <fcntl.h>
-#include <linux/videodev2.h>
 #include <libv4l2.h>
 
 namespace PiVehicle {
-    int CreateFpvCamera(const char *path, IFpvCamera *camera) {
+    int CreateFpvCamera(const std::string &path, IFpvCamera *camera) {
+        camera = nullptr;
         LOG(INFO) << "Opening camera: " << path;
-        int fd = v4l2_open(path, O_NONBLOCK | O_RDWR);
+        int fd = v4l2_open(path.c_str(), O_NONBLOCK | O_RDWR);
         if (errno != 0) {
             LOG(ERROR) << "Couldn't open " << path << ": " << strerror(errno) << ". Returned.";
             return 1;
         }
-        struct v4l2_capability capability;
-        struct v4l2_format format;
-        struct v4l2_fmtdesc fmtdesc;
-        memset(&capability, 0, sizeof(capability));
-        memset(&format, 0, sizeof(format));
-        memset(&fmtdesc, 0, sizeof(fmtdesc));
-        int res = v4l2_ioctl(fd, VIDIOC_QUERYCAP, &capability);
-        if (res != 0) {
+        v4l2_capability capability {};
+        v4l2_format format {};
+        v4l2_fmtdesc formatDescription {};
+        if (v4l2_ioctl(fd, VIDIOC_QUERYCAP, &capability) != 0) {
             LOG(ERROR) << "Couldn't query capabilities of " << path << ": " << strerror(errno) << ". Returned.";
+            return 1;
         }
         if (!capability.capabilities & V4L2_CAP_VIDEO_CAPTURE) {
             LOG(ERROR) << path << " is not a camera. Returned.";
@@ -32,23 +29,20 @@ namespace PiVehicle {
             return 1;
         }
         format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        res = v4l2_ioctl(fd, VIDIOC_G_FMT, &format);
-        if (res != 0) {
+        if (v4l2_ioctl(fd, VIDIOC_G_FMT, &format) != 0) {
             LOG(ERROR) << "Couldn't get data format: " << strerror(errno) << ". Returned.";
             return 1;
         }
-        LOG(INFO) << "Support " << fmtdesc.index + 1 << " pixel format(s):";
-        fmtdesc.index = 0;
-        fmtdesc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        FpvCameraLinux *_camera = new FpvCameraLinux();
+        LOG(INFO) << path << " supports " << formatDescription.index + 1 << " pixel format(s):";
+        formatDescription.index = 0;
+        formatDescription.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        auto _camera = new FpvCameraLinux();
         _camera->setPath(path);
         _camera->setFd(fd);
-        _camera->setV4l2Capability(capability);
-        _camera->setV4l2Format(format);
-        while (v4l2_ioctl(fd, VIDIOC_ENUM_FMT, &fmtdesc) != -1) {
-            fmtdesc.index++;
-            _camera->addV4l2PixelFormat(fmtdesc.pixelformat);
-            LOG(INFO) << "\t\t" << fmtdesc.description;
+        while (v4l2_ioctl(fd, VIDIOC_ENUM_FMT, &formatDescription) != -1) {
+            formatDescription.index++;
+            _camera->addV4l2PixelFormat(formatDescription.pixelformat);
+            LOG(INFO) << "\t\t" << formatDescription.description;
         }
         camera = _camera;
         return 0;

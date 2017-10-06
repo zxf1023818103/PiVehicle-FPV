@@ -9,20 +9,25 @@
 namespace PiVehicle {
 
     class FpvCameraLinux : public IFpvCamera {
-        friend int CreateFpvCamera(const char *path, IFpvCamera *camera);
+        friend int CreateFpvCamera(const std::string &path, IFpvCamera *camera);
     public:
         FpvCameraLinux();
-        ~FpvCameraLinux();
+        ~FpvCameraLinux() override;
+        int getDeviceName(std::string &name) override;
+        int getAllPixelFormats(FpvPixelFormatList &list);
+        int setPixelFormat(FpvPixelFormat pixelFormat);
+        int getPixelFormat(FpvPixelFormat &pixelFormat);
+        int setFrameSize(const FpvCameraFrameSize &size);
+        int getFrameSize(FpvCameraFrameSize &size);
+
     protected:
-        void setFd(int fd) { _fd = fd; }
-        void setV4l2Capability(v4l2_capability capability) { _capability = capability; }
-        void setV4l2Format(v4l2_format format) { _format = format; }
-        void addV4l2PixelFormat(__u32 pixelformat);
+        void setFd(int fd);
+        void addV4l2PixelFormat(__u32 pixelFormat);
     private:
-        int _fd;
-        v4l2_capability _capability;
-        v4l2_format _format;
-        std::vector<__u32> _pixelformat;
+        int fd = 0;
+        v4l2_capability capability {};
+        v4l2_format format {};
+        FpvPixelFormatList pixelFormatList;
     };
 
 };  // namespace PiVehicle

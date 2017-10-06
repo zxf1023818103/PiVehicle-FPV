@@ -1,19 +1,33 @@
 #ifndef PI_VEHICLE_FPV_IFPVCAMERA_H
 #define PI_VEHICLE_FPV_IFPVCAMERA_H
 
+#include <string>
+#include <vector>
+#include <asm/types.h>
+
 namespace PiVehicle {
 
+    using FpvPixelFormat = __u32;
+    using FpvPixelFormatList = std::vector<FpvPixelFormat>;
+
+    struct FpvCameraFrameSize {
+        size_t width;
+        size_t height;
+    };
+
     class IFpvCamera {
-        friend int CreateFpvCamera(const char *path, IFpvCamera *camera);
+        friend int CreateFpvCamera(const std::string &path, IFpvCamera *camera);
     public:
         IFpvCamera();
         virtual ~IFpvCamera() = 0;
+        virtual int getDeviceName(std::string &name)= 0;
     protected:
-        void setPath(const char* path);
+        void setPath(const std::string &path) { this->path = path; }
 
     protected:
-        char *path;
+        std::string path;
     };
+
 };  // namespace PiVehicle
 
 #endif
