@@ -2,7 +2,6 @@
 #define PI_VEHICLE_FPV_FPVCAMERALINUX_H
 
 #include "IFpvCamera.h"
-#include "pifpv.h"
 #include <linux/videodev2.h>
 #include <vector>
 

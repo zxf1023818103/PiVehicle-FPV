@@ -1,6 +1,6 @@
 #define GLOG_NO_ABBREVIATED_SEVERITIES
 
-#include "pifpv.h"
+#include "IFpvCamera.h"
 #include <windows.h>
 #include <glog/logging.h>
 

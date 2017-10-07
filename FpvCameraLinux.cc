@@ -75,7 +75,7 @@ namespace PiVehicle {
             LOG(ERROR) << "Couldn't query capabilities of " << path << ": " << strerror(errno) << ". Returned.";
             return 1;
         }
-        for (int i = 0; i < (sizeof capability.card / sizeof capability.card[0]); ++i)
+        for (int i = 0; i < sizeof capability.card / sizeof capability.card[0]; ++i)
             name[i] = capability.card[i];
         return 0;
     }

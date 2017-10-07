@@ -1,4 +1,4 @@
-#include "pifpv.h"
+#include "IFpvStreamServer.h"
 
 namespace PiVehicle {
     int CreateFpvStreamServer(int type, IFpvStreamServer *server) {

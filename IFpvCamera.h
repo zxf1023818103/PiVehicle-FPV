@@ -7,6 +7,7 @@
 
 namespace PiVehicle {
 
+    using FpvCameraList = std::vector<std::string>;
     using FpvPixelFormat = __u32;
     using FpvPixelFormatList = std::vector<FpvPixelFormat>;
 
@@ -14,6 +15,9 @@ namespace PiVehicle {
         size_t width;
         size_t height;
     };
+
+    int QueryFpvCamera(FpvCameraList &list);
+    int CreateFpvCamera(const std::string &path, IFpvCamera *camera);
 
     class IFpvCamera {
         friend int CreateFpvCamera(const std::string &path, IFpvCamera *camera);

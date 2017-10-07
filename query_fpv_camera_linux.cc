@@ -1,4 +1,4 @@
-#include "pifpv.h"
+#include "IFpvCamera.h"
 #include <glog/logging.h>
 #include <glob.h>
 #include <string>

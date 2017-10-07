@@ -1,4 +1,3 @@
-#include "pifpv.h"
 #include "FpvCameraLinux.h"
 #include <glog/logging.h>
 #include <fcntl.h>
@@ -33,7 +32,7 @@ namespace PiVehicle {
             LOG(ERROR) << "Couldn't get data format: " << strerror(errno) << ". Returned.";
             return 1;
         }
-        LOG(INFO) << path << " supports " << formatDescription.index + 1 << " pixel format(s):";
+        LOG(INFO) << path << " supports " << std::to_string(formatDescription.index + 1) << " pixel format(s):";
         formatDescription.index = 0;
         formatDescription.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         auto _camera = new FpvCameraLinux();
@@ -48,14 +47,14 @@ namespace PiVehicle {
         return 0;
     }
 
-    void PrintCameraCapabilities(const struct v4l2_capability *capability) {
-        LOG(INFO) << "Driver:\t\t" << capability->driver;
-        LOG(INFO) << "Card:\t\t" << capability->card;
-        LOG(INFO) << "Bus:\t\t" << capability->bus_info;
-//        LOG(INFO) << "Version:\t\t"
-//                  << (int)(capability->version >> 16) & 0xFF << "."
-//                  << (int)(capability->version >> 8) & 0xFF << "."
-//                  << (int)capability->version & 0xFF;
+    void PrintCameraCapabilities(const v4l2_capability &capability) {
+        LOG(INFO) << "Driver:\t\t" << capability.driver;
+        LOG(INFO) << "Card:\t\t" << capability.card;
+        LOG(INFO) << "Bus:\t\t" << capability.bus_info;
+        LOG(INFO) << "Version:\t\t"
+                  << std::to_string(capability.version >> 16 & 0xFF) << "."
+                  << std::to_string(capability.version >> 8 & 0xFF) << "."
+                  << std::to_string(capability.version & 0xFF);
         LOG(INFO) << "Capabilities:";
         const unsigned int capabilities[] = {
                         V4L2_CAP_VIDEO_CAPTURE,
@@ -114,7 +113,7 @@ namespace PiVehicle {
                 "V4L2_CAP_DEVICE_CAPS"
         };
         for (int i = 0; i < 26; ++i) {
-            if (capabilities[i] & capability->capabilities)
+            if (capabilities[i] & capability.capabilities)
                 LOG(INFO) << "\t\t" << str_capabilities[i];
         }
     }
