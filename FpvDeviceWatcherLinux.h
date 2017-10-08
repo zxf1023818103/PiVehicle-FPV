@@ -17,6 +17,8 @@ namespace PiVehicle {
         FpvDeviceWatcherLinux();
         ~FpvDeviceWatcherLinux() override;
 
+    protected:
+        static std::thread _worker_thread;
         static int worker();
     };
 

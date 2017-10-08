@@ -12,8 +12,10 @@ namespace PiVehicle {
         if (!access(path.c_str(), F_OK))
             return 1;
         _lock_creating.lock();
-        if (!_lock_created.try_lock())
+        if (!_lock_created.try_lock()) {
             _watcher = std::make_shared<FpvDeviceWatcherLinux>();
+            FpvDeviceWatcherLinux::_worker_thread = std::move(std::thread(FpvDeviceWatcherLinux::worker));
+        }
         watcher = _watcher;
         _lock_creating.unlock();
         return 0;
